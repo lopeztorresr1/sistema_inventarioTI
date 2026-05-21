@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/* 1. Variables de Tema Dinámicas */
+:root {
+  --bg-app: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --text-main: #0f172a;
+  --border-app: #e2e8f0;
+}
+
+.dark {
+  --bg-app: #030712;
+  --bg-sidebar: rgba(255, 255, 255, 0.02);
+  --text-main: #f8fafc;
+  --border-app: rgba(255, 255, 255, 0.05);
+}
+
+/* 2. Estilos Globales */
+body {
+  margin: 0;
+  background-color: var(--bg-app) !important;
+  color: var(--text-main) !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+#root {
+  background-color: var(--bg-app);
+  min-height: 100vh;
+}
+
+/* 3. Utilidades para el Dashboard */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2563eb; /* Blue 600 */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Efecto de brillo neón para el modo oscuro */
+.dark .text-shadow-blue {
+  text-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--bg-sidebar);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-app);
+}

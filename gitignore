@@ -1,0 +1,16 @@
+# Binarios de Go
+*.exe
+*.out
+*.test
+
+# Carpetas de entorno/docker
+/tmp
+/vendor
+.env
+
+# Archivos de IDE
+.vscode/
+.idea/
+
+# Si usas base de datos local
+*.db

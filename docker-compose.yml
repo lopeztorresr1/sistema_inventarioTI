@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Contenedor 1: Base de Datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: asset_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: hardware_db
+      MYSQL_USER: dev_user
+      MYSQL_PASSWORD: dev_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Contenedor 2: Backend en Go
+  backend:
+    build: .
+    container_name: asset_backend
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=dev_user
+      - DB_PASSWORD=dev_password
+      - DB_NAME=hardware_db
+      - JWT_SECRET=Avisp0N$2018
+      - DB_DSN=dev_user:dev_password@tcp(db:3306)/hardware_db?charset=utf8mb4&parseTime=True&loc=Local
+      - ALLOWED_ORIGINS=http://localhost:5173
+    volumes:
+      # Mantenemos únicamente el almacenamiento de archivos si tu backend guarda imágenes/documentos
+      - ./storage:/app/storage
+
+# Contenedor 3: Frontend (React / Vite)
+  frontend:
+    build:
+      context: ./frontend # Docker entra a la carpeta front y busca el Dockerfile ahí dentro
+    container_name: asset_frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8080/api/v1
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Evita que los node_modules de tu PC pisen los del contenedor
+volumes:
+  db_data:

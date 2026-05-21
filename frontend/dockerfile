@@ -1,0 +1,14 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Al estar dentro del contexto ./frontend, apuntamos directo a sus archivos
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 5173
+
+# Forzamos a Vite a escuchar las peticiones externas al contenedor
+CMD ["npm", "run", "dev", "--", "--host"]
