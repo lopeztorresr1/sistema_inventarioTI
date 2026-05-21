@@ -32,8 +32,6 @@ func Connect() {
 		log.Fatal("Error al conectar a la base de datos: ", err)
 	}
 
-	// AutoMigrate es aceptable en desarrollo.
-	// En producción se recomienda reemplazarlo por golang-migrate con archivos .sql versionados.
 	err = DB.AutoMigrate(
 		&models.Sucursal{},
 		&models.Grupo{},

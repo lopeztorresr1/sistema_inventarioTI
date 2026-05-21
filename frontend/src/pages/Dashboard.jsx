@@ -61,7 +61,7 @@ const Dashboard = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-white/5 pb-8">
                     <div className="space-y-2">
                         <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic">
-                            Status <span className="text-blue-500" style={{ textShadow: '0 0 20px rgba(59,130,246,0.5)' }}>DASHBOARD</span>
+                            <span className="text-blue-500" style={{ textShadow: '0 0 20px rgba(59,130,246,0.5)' }}>DASHBOARD</span>
                         </h1>
                         <p className="text-slate-400 text-lg font-medium">PANEL PRINCIPAL · Gestión de Activos TI</p>
                     </div>

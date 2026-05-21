@@ -19,8 +19,6 @@ func jwtSecret() []byte {
 	return []byte(os.Getenv("JWT_SECRET"))
 }
 
-// LoginResponse es el DTO de respuesta del login.
-// Omite el campo Password para no exponerlo nunca en la respuesta.
 type LoginResponse struct {
 	ID     uint   `json:"id"`
 	Nombre string `json:"nombre"`

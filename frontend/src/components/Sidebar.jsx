@@ -99,7 +99,7 @@ const Sidebar = ({ children }) => {
                     </div>
                     {!isCollapsed && (
                         <span className={`font-black tracking-tighter text-lg whitespace-nowrap italic ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-                            ACTIVOS <span className="text-blue-500">TI</span>
+                            INVENTARIO <span className="text-blue-500">TI</span>
                         </span>
                     )}
                 </div>
