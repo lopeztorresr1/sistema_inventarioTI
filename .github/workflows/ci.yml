@@ -1,0 +1,55 @@
+name: CI Sistema Inventario TI
+
+# ¿Cuándo se ejecutará esto?
+on:
+  push:
+    branches: [ "main", "master" ] # Cuando hagas push a estas ramas
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # Trabajo 1: Probar el Backend (Go)
+  build-backend:
+    name: Build Backend Go
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend # Le decimos que entre a la carpeta backend
+
+    steps:
+    - name: Descargar el código
+      uses: actions/checkout@v4
+
+    - name: Configurar Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21' # Ajusta si usas otra versión específica
+
+    - name: Descargar dependencias
+      run: go mod download
+
+    - name: Compilar la API
+      run: go build -v ./cmd/api/main.go
+
+  # Trabajo 2: Probar el Frontend (React/Vite)
+  build-frontend:
+    name: Build Frontend React
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend # Le decimos que entre a la carpeta frontend
+
+    steps:
+    - name: Descargar el código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Instalar dependencias
+      run: npm install
+
+    - name: Compilar el proyecto Vite
+      run: npm run build
