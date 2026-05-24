@@ -23,7 +23,6 @@ jobs:
       - name: Descargar el código
         uses: actions/checkout@v4
 
-      # Novedad: Configurar el motor avanzado de Docker
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -43,12 +42,11 @@ jobs:
       - name: Construir y Subir Imagen de Backend
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
-          file: ./backend/dockerfile
+          context: .             # ACTUALIZADO: Apunta a la raíz del proyecto
+          file: ./dockerfile     # ACTUALIZADO: Lee el archivo dockerfile en la raíz
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Novedad: Caché para acelerar builds en Go
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -60,7 +58,6 @@ jobs:
       - name: Descargar el código
         uses: actions/checkout@v4
 
-      # Novedad: Configurar el motor avanzado de Docker
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -85,6 +82,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Novedad: Caché para acelerar dependencias de React/Node
           cache-from: type=gha
           cache-to: type=gha,mode=max
