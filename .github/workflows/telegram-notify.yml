@@ -1,0 +1,23 @@
+name: Notificaciones de Telegram
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  notificar:
+    name: Enviar Alerta
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enviar mensaje por Telegram
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🚀 Actualización en el Sistema de Inventario
+            👤 Autor: ${{ github.actor }}
+            📝 Cambio: ${{ github.event.commits[0].message }}
+            
+            🔗 Ver detalles en GitHub: 
+            ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
