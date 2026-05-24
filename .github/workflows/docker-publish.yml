@@ -1,0 +1,79 @@
+name: Construir y Publicar Imágenes Docker
+
+# Este flujo se activará SOLAMENTE cuando crees una etiqueta (tag) que empiece con "v" (ej: v1.0, v2.1.3)
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*'
+
+# Otorgamos permisos para escribir en el registro de paquetes de GitHub (GHCR)
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  # Esto convertirá el nombre de tu usuario/repositorio a minúsculas automáticamente
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # --- TRABAJO 1: BACKEND ---
+  build-and-push-backend:
+    name: Build & Push Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Iniciar sesión en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extraer metadatos para Docker (Tags y Labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+
+      - name: Construir y Subir Imagen de Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/dockerfile
+          push: true
+          tags: ${{ id.meta.outputs.tags }}
+          labels: ${{ id.meta.outputs.labels }}
+
+  # --- TRABAJO 2: FRONTEND ---
+  build-and-push-frontend:
+    name: Build & Push Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Iniciar sesión en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extraer metadatos para Docker (Tags y Labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+
+      - name: Construir y Subir Imagen de Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/dockerfile
+          push: true
+          tags: ${{ id.meta.outputs.tags }}
+          labels: ${{ id.meta.outputs.labels }}
