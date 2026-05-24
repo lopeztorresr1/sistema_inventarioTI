@@ -15,19 +15,22 @@ const Sidebar = ({ children }) => {
 
     const navigate  = useNavigate();
     const location  = useLocation();
-    const user      = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // CAMBIA ESTA LÍNEA EXACTAMENTE:
+    const user      = JSON.parse(sessionStorage.getItem('user') || '{}');
+
     const isAdmin   = user.rol === 'ADMIN';
 
     useEffect(() => {
-        const root = window.document.documentElement;
-        if (isDarkMode) {
-            root.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            root.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-    }, [isDarkMode]);
+    const root = window.document.documentElement;
+    if (isDarkMode) {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark'); // Este se queda en localStorage, está perfecto
+    } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+    }
+}, [isDarkMode]);
 
     const menuGroups = [
         {
