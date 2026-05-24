@@ -5,7 +5,7 @@ on:
     tags:
       - 'v*.*.*' # Se activa al subir un tag de versión
 
-# Otorgamos permisos a GitHub para escribir en la sección de Releases
+
 permissions:
   contents: write
 
