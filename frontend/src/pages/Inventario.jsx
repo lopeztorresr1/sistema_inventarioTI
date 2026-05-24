@@ -4,9 +4,8 @@ import api from '../api/axios';
 import { QRCodeSVG } from 'qrcode.react';
 import {
     Plus, Search, Monitor, History, Trash2, Edit2, X, Loader2,
-    Eye, UserPlus, Save, ShieldCheck, AlertCircle, MapPin,
-    Hash, Tag, Package, Info, DollarSign, FileText, Calendar,
-    Clock, QrCode, ArrowLeftRight, ChevronLeft, ChevronRight
+    Eye, UserPlus, ShieldCheck, Package, Info, Tag, Clock, QrCode, 
+    ArrowLeftRight, ChevronLeft, ChevronRight, FileText, MapPin
 } from 'lucide-react';
 
 const Inventario = () => {
@@ -42,7 +41,6 @@ const Inventario = () => {
 
     const [assignData, setAssignData] = useState({ empleado_id: '', notas: '' });
 
-    // fetchData usa useCallback para poder llamarlo desde efectos con dependencias correctas
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
@@ -55,7 +53,6 @@ const Inventario = () => {
                 api.get('/empleados'),
             ]);
 
-            // El backend ahora devuelve { data, total, page, pages }
             setEquipos(resEq.data.data ?? resEq.data);
             setTotal(resEq.data.total ?? 0);
             setPages(resEq.data.pages ?? 1);
@@ -70,7 +67,6 @@ const Inventario = () => {
         }
     }, [activeTab, searchTerm, page]);
 
-    // Reinicia a página 1 cuando cambian los filtros
     useEffect(() => { setPage(1); }, [activeTab, searchTerm]);
     useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -178,29 +174,29 @@ const Inventario = () => {
                 {/* HEADER */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Inventario</h1>
-                        <p className="text-slate-400 mt-1">
+                        <h1 className="text-3xl font-bold text-text-primary tracking-tight">Inventario</h1>
+                        <p className="text-text-secondary mt-1">
                             {total} equipo{total !== 1 ? 's' : ''} registrado{total !== 1 ? 's' : ''}
                         </p>
                     </div>
                     <button
                         onClick={() => openModal('create')}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+                        className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-custom font-bold transition-all shadow-lg active:scale-95 cursor-pointer"
                     >
                         <Plus size={20} /> Nuevo Equipo
                     </button>
                 </div>
 
-                {/* TABS */}
-                <div className="flex gap-2 p-1 bg-white/5 w-fit rounded-2xl border border-white/10">
+                {/* TABS VARIABLES */}
+                <div className="flex gap-2 p-1 bg-bg-card-hover w-fit rounded-2xl border border-border-app">
                     {['activos', 'bajas'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-2 rounded-xl text-sm font-bold transition-all capitalize ${
+                            className={`px-6 py-2 rounded-xl text-sm font-bold transition-all capitalize cursor-pointer ${
                                 activeTab === tab
-                                    ? 'bg-blue-600 text-white shadow-lg'
-                                    : 'text-slate-400 hover:text-white'
+                                    ? 'bg-accent text-white shadow-lg'
+                                    : 'text-text-muted hover:text-text-primary'
                             }`}
                         >
                             {tab}
@@ -208,60 +204,62 @@ const Inventario = () => {
                     ))}
                 </div>
 
-                {/* BUSCADOR */}
+                {/* BUSCADOR VARIABLE */}
                 <div className="relative max-w-sm">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
                     <input
                         type="text"
                         placeholder="Buscar por nombre, serie o código..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-slate-200 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
+                        className="w-full bg-bg-input border border-border-app rounded-xl py-2.5 pl-11 pr-4 text-text-primary text-sm focus:outline-none focus:border-accent transition-all placeholder:text-text-muted"
                     />
                 </div>
 
-                {/* TABLA */}
-                <div className="bg-white/[0.02] border border-white/[0.05] rounded-3xl overflow-hidden">
+                {/* TABLA VARIABLE */}
+                <div className="bg-bg-card border border-border-app rounded-3xl overflow-hidden shadow-sm">
                     <table className="w-full text-left text-sm">
                         <thead>
-                            <tr className="border-b border-white/[0.05] bg-white/[0.02]">
-                                <th className="p-6 text-xs font-bold text-slate-500 uppercase tracking-widest">Equipo</th>
-                                <th className="p-6 text-xs font-bold text-slate-500 uppercase tracking-widest">Modelo</th>
-                                <th className="p-6 text-xs font-bold text-slate-500 uppercase tracking-widest">Ubicación</th>
-                                <th className="p-6 text-xs font-bold text-slate-500 uppercase tracking-widest text-center">Estado</th>
-                                <th className="p-6 text-right">Acciones</th>
+                            <tr className="border-b border-border-app bg-bg-card-hover">
+                                <th className="p-6 text-xs font-bold text-text-muted uppercase tracking-widest">Equipo</th>
+                                <th className="p-6 text-xs font-bold text-text-muted uppercase tracking-widest">Modelo</th>
+                                <th className="p-6 text-xs font-bold text-text-muted uppercase tracking-widest">Ubicación</th>
+                                <th className="p-6 text-xs font-bold text-text-muted uppercase tracking-widest text-center">Estado</th>
+                                <th className="p-6 text-right text-text-muted font-bold text-xs uppercase tracking-widest">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-border-app">
                             {loading ? (
                                 <tr>
                                     <td colSpan="5" className="p-20 text-center">
-                                        <Loader2 className="animate-spin mx-auto text-blue-500" size={40} />
+                                        <Loader2 className="animate-spin mx-auto text-accent" size={40} />
                                     </td>
                                 </tr>
                             ) : equipos.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" className="p-16 text-center text-slate-500 italic">
+                                    <td colSpan="5" className="p-16 text-center text-text-muted italic">
                                         No se encontraron equipos
                                     </td>
                                 </tr>
                             ) : equipos.map(e => (
-                                <tr key={e.id} className="hover:bg-white/[0.02] transition-colors">
+                                <tr key={e.id} className="hover:bg-bg-card-hover transition-colors">
                                     <td className="p-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="text-[10px] font-black opacity-20 w-8">#{e.id}</div>
+                                            <div className="text-[10px] font-black opacity-40 w-8 text-text-muted">#{e.id}</div>
                                             <div>
-                                                <p className="font-bold text-sm leading-none mb-1 text-white">{e.nombre}</p>
-                                                <p className="text-[10px] font-mono opacity-50">{e.codigo}</p>
+                                                <p className="font-bold text-sm leading-none mb-1 text-text-primary">{e.nombre}</p>
+                                                <p className="text-[10px] font-mono text-text-muted opacity-70">{e.codigo}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="p-6">
-                                        <p className="text-xs font-bold text-slate-300">{e.modelo?.marca?.nombre} {e.modelo?.nombre}</p>
-                                        <p className="text-[10px] opacity-40 uppercase">{e.modelo?.tipo_equipo?.nombre}</p>
+                                        <p className="text-xs font-bold text-text-secondary">{e.modelo?.marca?.nombre} {e.modelo?.nombre}</p>
+                                        <p className="text-[10px] text-text-muted uppercase font-semibold">{e.modelo?.tipo_equipo?.nombre}</p>
                                     </td>
-                                    <td className="p-6 text-xs font-medium opacity-60">
-                                        <MapPin size={14} className="inline mr-1" /> {e.sucursal?.nombre}
+                                    <td className="p-6 text-xs font-medium text-text-secondary">
+                                        <div className="flex items-center gap-1">
+                                            <MapPin size={14} className="text-text-muted" /> {e.sucursal?.nombre}
+                                        </div>
                                     </td>
                                     <td className="p-6 text-center">
                                         <span className={`px-3 py-1 rounded-full text-[9px] font-black border uppercase ${
@@ -275,20 +273,20 @@ const Inventario = () => {
                                     </td>
                                     <td className="p-6 text-right">
                                         <div className="flex justify-end gap-1">
-                                            <button onClick={() => openModal('view', e)} className="p-2 hover:bg-blue-500/10 text-blue-500 rounded-lg" title="Ficha Técnica"><Eye size={18} /></button>
+                                            <button onClick={() => openModal('view', e)} className="p-2 hover:bg-accent/10 text-accent rounded-lg cursor-pointer transition-all" title="Ficha Técnica"><Eye size={18} /></button>
                                             {activeTab === 'activos' ? (
                                                 <>
                                                     {e.estado === 'DISPONIBLE' && (
-                                                        <button onClick={() => openAssignModal(e)} className="p-2 hover:bg-purple-500/10 text-purple-500 rounded-lg" title="Asignar"><UserPlus size={18} /></button>
+                                                        <button onClick={() => openAssignModal(e)} className="p-2 hover:bg-purple-500/10 text-purple-500 rounded-lg cursor-pointer transition-all" title="Asignar"><UserPlus size={18} /></button>
                                                     )}
                                                     {e.estado === 'ASIGNADO' && (
-                                                        <button onClick={() => handleDesasignar(e.id)} className="p-2 hover:bg-orange-500/10 text-orange-500 rounded-lg" title="Desasignar"><ArrowLeftRight size={18} /></button>
+                                                        <button onClick={() => handleDesasignar(e.id)} className="p-2 hover:bg-orange-500/10 text-orange-500 rounded-lg cursor-pointer transition-all" title="Desasignar"><ArrowLeftRight size={18} /></button>
                                                     )}
-                                                    <button onClick={() => openModal('edit', e)} className="p-2 hover:bg-amber-500/10 text-amber-500 rounded-lg" title="Editar"><Edit2 size={18} /></button>
-                                                    <button onClick={() => handleBajaLogica(e.id)} className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg" title="Baja"><Trash2 size={18} /></button>
+                                                    <button onClick={() => openModal('edit', e)} className="p-2 hover:bg-amber-500/10 text-amber-500 rounded-lg cursor-pointer transition-all" title="Editar"><Edit2 size={18} /></button>
+                                                    <button onClick={() => handleBajaLogica(e.id)} className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg cursor-pointer transition-all" title="Baja"><Trash2 size={18} /></button>
                                                 </>
                                             ) : (
-                                                <button onClick={() => handleReactivar(e.id)} className="p-2 hover:bg-emerald-500/10 text-emerald-500 rounded-lg" title="Reactivar"><ShieldCheck size={18} /></button>
+                                                <button onClick={() => handleReactivar(e.id)} className="p-2 hover:bg-emerald-500/10 text-emerald-500 rounded-lg cursor-pointer transition-all" title="Reactivar"><ShieldCheck size={18} /></button>
                                             )}
                                         </div>
                                     </td>
@@ -296,49 +294,49 @@ const Inventario = () => {
                             ))}
                         </tbody>
                     </table>
-
-                    {/* PAGINACIÓN */}
-                    {pages > 1 && (
-                        <div className="flex items-center justify-between px-6 py-4 border-t border-white/5">
-                            <span className="text-xs text-slate-500">
-                                Página {page} de {pages} — {total} resultados
-                            </span>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                                    disabled={page === 1}
-                                    className="p-2 rounded-lg hover:bg-white/5 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                                >
-                                    <ChevronLeft size={18} />
-                                </button>
-                                <button
-                                    onClick={() => setPage(p => Math.min(pages, p + 1))}
-                                    disabled={page === pages}
-                                    className="p-2 rounded-lg hover:bg-white/5 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                                >
-                                    <ChevronRight size={18} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
+
+                {/* PAGINACIÓN VARIABLE */}
+                {pages > 1 && (
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-border-app">
+                        <span className="text-xs text-text-muted">
+                            Página {page} de {pages} — {total} resultados
+                        </span>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                className="p-2 rounded-lg hover:bg-bg-card-hover text-text-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                            >
+                                <ChevronLeft size={18} />
+                            </button>
+                            <button
+                                onClick={() => setPage(p => Math.min(pages, p + 1))}
+                                disabled={page === pages}
+                                className="p-2 rounded-lg hover:bg-bg-card-hover text-text-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                            >
+                                <ChevronRight size={18} />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* MODAL FICHA / EDITAR — sin cambios en su contenido interno */}
+            {/* MODAL CENTRAL DE DATOS COMPLETAMENTE VARIABLE */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-md">
-                    <div className="bg-[#0B0F1A] border border-white/10 w-full max-w-6xl rounded-[3rem] p-10 relative overflow-y-auto max-h-[90vh]">
-                        <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-white/20 hover:text-white transition-all"><X size={32} /></button>
+                    <div className="bg-bg-card border border-border-app w-full max-w-6xl rounded-custom p-10 relative overflow-y-auto max-h-[90vh] shadow-2xl">
+                        <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-text-muted hover:text-text-primary transition-all cursor-pointer"><X size={28} /></button>
 
                         <div className="flex items-center gap-4 mb-10">
-                            <div className="bg-blue-600 p-3 rounded-2xl text-white shadow-lg shadow-blue-600/30">
+                            <div className="bg-accent p-3 rounded-2xl text-white shadow-lg shadow-accent/20">
                                 {modalMode === 'view' ? <FileText size={24} /> : <Package size={24} />}
                             </div>
                             <div>
-                                <h2 className="text-2xl font-bold text-white uppercase tracking-tighter">
+                                <h2 className="text-2xl font-bold text-text-primary uppercase tracking-tighter">
                                     {modalMode === 'create' ? 'Nuevo Ingreso' : modalMode === 'edit' ? 'Edición Técnica' : `Ficha: ${formData.codigo}`}
                                 </h2>
-                                <p className="text-white/30 text-xs font-bold uppercase tracking-widest">Mantenimiento de Activos</p>
+                                <p className="text-text-muted text-xs font-bold uppercase tracking-widest">Mantenimiento de Activos</p>
                             </div>
                         </div>
 
@@ -346,41 +344,41 @@ const Inventario = () => {
                             <form onSubmit={handleGuardar} className="lg:col-span-3 space-y-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <section className="space-y-4">
-                                        <h3 className="text-blue-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><Info size={14} /> Identificación</h3>
+                                        <h3 className="text-accent text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><Info size={14} /> Identificación</h3>
                                         <div className="space-y-4">
                                             <div className="space-y-1">
-                                                <label className="text-[10px] font-bold text-white/30 uppercase ml-1">Nombre</label>
-                                                <input disabled={modalMode === 'view'} className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-5 text-white outline-none focus:border-blue-500" value={formData.nombre} onChange={e => setFormData({ ...formData, nombre: e.target.value })} required />
+                                                <label className="text-[10px] font-bold text-text-label uppercase ml-1">Nombre</label>
+                                                <input disabled={modalMode === 'view'} className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-5 text-text-primary outline-none focus:border-accent disabled:opacity-60 transition-colors" value={formData.nombre} onChange={e => setFormData({ ...formData, nombre: e.target.value })} required />
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[10px] font-bold text-white/30 uppercase ml-1">S/N Serie</label>
-                                                <input disabled={modalMode === 'view'} className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-5 text-white outline-none focus:border-blue-500 font-mono" value={formData.serie} onChange={e => setFormData({ ...formData, serie: e.target.value })} required />
+                                                <label className="text-[10px] font-bold text-text-label uppercase ml-1">S/N Serie</label>
+                                                <input disabled={modalMode === 'view'} className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-5 text-text-primary outline-none focus:border-accent font-mono disabled:opacity-60 transition-colors" value={formData.serie} onChange={e => setFormData({ ...formData, serie: e.target.value })} required />
                                             </div>
                                         </div>
                                     </section>
 
                                     <section className="space-y-4">
-                                        <h3 className="text-blue-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><Tag size={14} /> Categorización</h3>
+                                        <h3 className="text-accent text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><Tag size={14} /> Categorización</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1">
-                                                <label className="text-[10px] font-bold text-white/30 uppercase ml-1">Marca</label>
-                                                <select disabled={modalMode === 'view'} className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-5 text-white outline-none appearance-none" value={formData.marca_id} onChange={e => setFormData({ ...formData, marca_id: e.target.value, modelo_id: '' })} required>
-                                                    <option value="" className="bg-[#0B0F1A]">Marca...</option>
-                                                    {marcas.map(m => <option key={m.id} value={m.id} className="bg-[#0B0F1A]">{m.nombre}</option>)}
+                                                <label className="text-[10px] font-bold text-text-label uppercase ml-1">Marca</label>
+                                                <select disabled={modalMode === 'view'} className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-5 text-text-primary outline-none appearance-none disabled:opacity-60" value={formData.marca_id} onChange={e => setFormData({ ...formData, marca_id: e.target.value, modelo_id: '' })} required>
+                                                    <option value="" className="bg-bg-card text-text-primary">Marca...</option>
+                                                    {marcas.map(m => <option key={m.id} value={m.id} className="bg-bg-card text-text-primary">{m.nombre}</option>)}
                                                 </select>
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[10px] font-bold text-white/30 uppercase ml-1">Modelo</label>
-                                                <select disabled={modalMode === 'view' || !formData.marca_id} className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-5 text-white outline-none" value={formData.modelo_id} onChange={e => setFormData({ ...formData, modelo_id: e.target.value })} required>
-                                                    <option value="" className="bg-[#0B0F1A]">Modelo...</option>
-                                                    {modelosDisponibles.map(m => <option key={m.id} value={m.id} className="bg-[#0B0F1A]">{m.nombre}</option>)}
+                                                <label className="text-[10px] font-bold text-text-label uppercase ml-1">Modelo</label>
+                                                <select disabled={modalMode === 'view' || !formData.marca_id} className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-5 text-text-primary outline-none disabled:opacity-60" value={formData.modelo_id} onChange={e => setFormData({ ...formData, modelo_id: e.target.value })} required>
+                                                    <option value="" className="bg-bg-card text-text-primary">Modelo...</option>
+                                                    {modelosDisponibles.map(m => <option key={m.id} value={m.id} className="bg-bg-card text-text-primary">{m.nombre}</option>)}
                                                 </select>
                                             </div>
                                             <div className="col-span-2 space-y-1">
-                                                <label className="text-[10px] font-bold text-white/30 uppercase ml-1">Sucursal</label>
-                                                <select disabled={modalMode === 'view'} className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-5 text-white outline-none" value={formData.sucursal_id} onChange={e => setFormData({ ...formData, sucursal_id: e.target.value })} required>
-                                                    <option value="" className="bg-[#0B0F1A]">Ubicación...</option>
-                                                    {sucursales.map(s => <option key={s.id} value={s.id} className="bg-[#0B0F1A]">{s.nombre}</option>)}
+                                                <label className="text-[10px] font-bold text-text-label uppercase ml-1">Sucursal</label>
+                                                <select disabled={modalMode === 'view'} className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-5 text-text-primary outline-none disabled:opacity-60" value={formData.sucursal_id} onChange={e => setFormData({ ...formData, sucursal_id: e.target.value })} required>
+                                                    <option value="" className="bg-bg-card text-text-primary">Ubicación...</option>
+                                                    {sucursales.map(s => <option key={s.id} value={s.id} className="bg-bg-card text-text-primary">{s.nombre}</option>)}
                                                 </select>
                                             </div>
                                         </div>
@@ -388,19 +386,19 @@ const Inventario = () => {
                                 </div>
 
                                 <section className="space-y-4">
-                                    <h3 className="text-blue-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><ShieldCheck size={14} /> Detalles Físicos</h3>
+                                    <h3 className="text-accent text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><ShieldCheck size={14} /> Detalles Físicos</h3>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-white/30 uppercase ml-1">Material</label>
-                                            <input disabled={modalMode === 'view'} className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-5 text-white outline-none focus:border-blue-500" value={formData.material || ''} onChange={e => setFormData({ ...formData, material: e.target.value })} placeholder="Ej: Aluminio" />
+                                            <label className="text-[10px] font-bold text-text-label uppercase ml-1">Material</label>
+                                            <input disabled={modalMode === 'view'} className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-5 text-text-primary outline-none focus:border-accent disabled:opacity-60 transition-colors" value={formData.material || ''} onChange={e => setFormData({ ...formData, material: e.target.value })} placeholder="Ej: Aluminio" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-white/30 uppercase ml-1">Color</label>
-                                            <input disabled={modalMode === 'view'} className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-5 text-white outline-none focus:border-blue-500" value={formData.color || ''} onChange={e => setFormData({ ...formData, color: e.target.value })} placeholder="Ej: Gris" />
+                                            <label className="text-[10px] font-bold text-text-label uppercase ml-1">Color</label>
+                                            <input disabled={modalMode === 'view'} className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-5 text-text-primary outline-none focus:border-accent disabled:opacity-60 transition-colors" value={formData.color || ''} onChange={e => setFormData({ ...formData, color: e.target.value })} placeholder="Ej: Gris" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-white/30 uppercase ml-1">Service Tag</label>
-                                            <input disabled={modalMode === 'view'} className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-5 text-white outline-none focus:border-blue-500 font-mono" value={formData.service_tag || ''} onChange={e => setFormData({ ...formData, service_tag: e.target.value })} placeholder="Código fabricante" />
+                                            <label className="text-[10px] font-bold text-text-label uppercase ml-1">Service Tag</label>
+                                            <input disabled={modalMode === 'view'} className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-5 text-text-primary outline-none focus:border-accent font-mono disabled:opacity-60 transition-colors" value={formData.service_tag || ''} onChange={e => setFormData({ ...formData, service_tag: e.target.value })} placeholder="Código fabricante" />
                                         </div>
                                     </div>
                                 </section>
@@ -408,24 +406,24 @@ const Inventario = () => {
                                 {modalMode === 'view' && (
                                     <section className="space-y-4">
                                         <h3 className="text-purple-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><History size={14} /> Historial de Uso</h3>
-                                        <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] overflow-hidden">
+                                        <div className="bg-bg-card border border-border-app rounded-[2rem] overflow-hidden shadow-sm">
                                             <table className="w-full text-left text-[11px]">
-                                                <thead className="bg-white/5 text-white/30">
+                                                <thead className="bg-bg-card-hover text-text-muted">
                                                     <tr>
-                                                        <th className="p-4">Fecha</th>
-                                                        <th className="p-4">Responsable</th>
-                                                        <th className="p-4 text-right">Estado</th>
+                                                        <th className="p-4 font-bold uppercase tracking-wider">Fecha</th>
+                                                        <th className="p-4 font-bold uppercase tracking-wider">Responsable</th>
+                                                        <th className="p-4 text-right font-bold uppercase tracking-wider">Estado</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y divide-white/5">
+                                                <tbody className="divide-y divide-border-app">
                                                     {historial.length > 0 ? historial.map((h, i) => (
-                                                        <tr key={i} className="text-white/60">
+                                                        <tr key={i} className="text-text-secondary hover:bg-bg-card-hover transition-colors">
                                                             <td className="p-4 font-mono">{new Date(h.fecha_entrega).toLocaleDateString()}</td>
-                                                            <td className="p-4">{h.empleado?.nombre} {h.empleado?.apellido}</td>
-                                                            <td className="p-4 text-right text-blue-400 font-bold uppercase">{h.estado}</td>
+                                                            <td className="p-4 font-medium">{h.empleado?.nombre} {h.empleado?.apellido}</td>
+                                                            <td className="p-4 text-right text-blue-500 font-bold uppercase">{h.estado}</td>
                                                         </tr>
                                                     )) : (
-                                                        <tr><td colSpan="3" className="p-8 text-center opacity-20 italic">Sin movimientos registrados</td></tr>
+                                                        <tr><td colSpan="3" className="p-8 text-center text-text-muted italic">Sin movimientos registrados</td></tr>
                                                     )}
                                                 </tbody>
                                             </table>
@@ -434,32 +432,35 @@ const Inventario = () => {
                                 )}
 
                                 {modalMode !== 'view' && (
-                                    <button type="submit" disabled={isSaving} className="w-full bg-blue-600 text-white font-black py-5 rounded-3xl shadow-lg uppercase tracking-widest text-xs active:scale-95 transition-all">
+                                    <button type="submit" disabled={isSaving} className="w-full bg-accent hover:bg-accent-hover text-white font-black py-5 rounded-3xl shadow-md uppercase tracking-widest text-xs active:scale-95 transition-all cursor-pointer">
                                         {isSaving ? <Loader2 className="animate-spin mx-auto" /> : (modalMode === 'edit' ? 'Guardar Cambios' : 'Registrar en Inventario')}
                                     </button>
                                 )}
                             </form>
 
+                            {/* PANEL LATERAL DEL QR COMPLETAMENTE ADAPTABLE */}
                             <div className="space-y-6">
-                                <div className="bg-white p-8 rounded-[2.5rem] flex flex-col items-center justify-center shadow-xl">
-                                    <p className="text-[10px] font-black text-black/30 uppercase mb-4 tracking-widest text-center">Identificación Digital</p>
-                                    {formData.id ? (
-                                        <QRCodeSVG value={`ITL-EQ-${formData.id}`} size={160} level="H" includeMargin />
-                                    ) : (
-                                        <div className="w-40 h-40 bg-black/5 rounded-2xl flex items-center justify-center"><QrCode className="opacity-10" size={48} /></div>
-                                    )}
-                                    <p className="text-[10px] font-mono text-black/40 mt-4 italic text-center">{formData.codigo || 'SISTEMA'}</p>
+                                <div className="bg-bg-card-hover border border-border-app p-8 rounded-[2.5rem] flex flex-col items-center justify-center shadow-sm">
+                                    <p className="text-[10px] font-black text-text-label uppercase mb-4 tracking-widest text-center">Identificación Digital</p>
+                                    <div className="bg-white p-4 rounded-2xl shadow-md border border-border-app">
+                                        {formData.id ? (
+                                            <QRCodeSVG value={`ITL-EQ-${formData.id}`} size={160} level="H" includeMargin />
+                                        ) : (
+                                            <div className="w-40 h-40 bg-bg-input rounded-2xl flex items-center justify-center"><QrCode className="text-text-muted opacity-40" size={48} /></div>
+                                        )}
+                                    </div>
+                                    <p className="text-[10px] font-mono text-text-secondary mt-4 italic text-center font-bold">{formData.codigo || 'SISTEMA'}</p>
                                 </div>
-                                <div className="bg-white/5 border border-white/10 p-6 rounded-[2rem] space-y-4">
-                                    <h3 className="text-white/20 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><Clock size={14} /> Trazabilidad</h3>
+                                <div className="bg-bg-card border border-border-app p-6 rounded-[2rem] space-y-4 shadow-sm">
+                                    <h3 className="text-text-muted text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><Clock size={14} /> Trazabilidad</h3>
                                     <div className="space-y-4">
                                         <div>
-                                            <p className="text-[9px] text-white/20 uppercase font-bold">Registro Inicial</p>
-                                            <p className="text-xs text-white/60 font-mono">{formData.created_at ? new Date(formData.created_at).toLocaleString() : '---'}</p>
+                                            <p className="text-[9px] text-text-label uppercase font-bold">Registro Inicial</p>
+                                            <p className="text-xs text-text-secondary font-mono font-medium">{formData.created_at ? new Date(formData.created_at).toLocaleString() : '---'}</p>
                                         </div>
                                         <div>
-                                            <p className="text-[9px] text-white/20 uppercase font-bold">Último Cambio</p>
-                                            <p className="text-xs text-blue-400 font-mono">{formData.updated_at ? new Date(formData.updated_at).toLocaleString() : '---'}</p>
+                                            <p className="text-[9px] text-text-label uppercase font-bold">Último Cambio</p>
+                                            <p className="text-xs text-accent font-mono font-bold">{formData.updated_at ? new Date(formData.updated_at).toLocaleString() : '---'}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -469,34 +470,34 @@ const Inventario = () => {
                 </div>
             )}
 
-            {/* MODAL DE ASIGNACIÓN */}
+            {/* MODAL DE ASIGNACIÓN ADAPTADO */}
             {isAssignModalOpen && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/40 backdrop-blur-md">
-                    <div className="bg-[#0B0F1A] border border-white/10 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
-                        <div className="flex justify-between items-center mb-6 text-white">
-                            <h2 className="text-xl font-bold uppercase italic tracking-tighter">Asignar Equipo</h2>
-                            <button onClick={() => setIsAssignModalOpen(false)} className="text-white/20 hover:text-white transition-all"><X size={24} /></button>
+                    <div className="bg-bg-card border border-border-app w-full max-w-md rounded-custom p-8 shadow-2xl">
+                        <div className="flex justify-between items-center mb-6 text-text-primary">
+                            <h2 className="text-xl font-bold uppercase italic tracking-tighter text-text-primary">Asignar Equipo</h2>
+                            <button onClick={() => setIsAssignModalOpen(false)} className="text-text-muted hover:text-text-primary transition-all cursor-pointer"><X size={24} /></button>
                         </div>
-                        <div className="bg-white/5 p-4 rounded-2xl mb-6 border border-white/5">
-                            <p className="text-[10px] font-black text-blue-400 uppercase mb-1">Activo</p>
-                            <p className="text-white font-bold text-sm">{formData.nombre}</p>
-                            <p className="text-[10px] font-mono text-white/30">{formData.codigo}</p>
+                        <div className="bg-bg-card-hover p-4 rounded-2xl mb-6 border border-border-app">
+                            <p className="text-[10px] font-black text-accent uppercase mb-1">Activo</p>
+                            <p className="text-text-primary font-bold text-sm">{formData.nombre}</p>
+                            <p className="text-[10px] font-mono text-text-muted">{formData.codigo}</p>
                         </div>
                         <form onSubmit={handleConfirmarAsignacion} className="space-y-5">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Colaborador</label>
-                                <select className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-4 text-white outline-none focus:border-purple-500 transition-all" value={assignData.empleado_id} onChange={e => setAssignData({ ...assignData, empleado_id: e.target.value })} required>
-                                    <option value="" className="bg-[#0B0F1A]">Seleccionar responsable...</option>
+                                <label className="text-[10px] font-bold text-text-label uppercase tracking-widest ml-1">Colaborador</label>
+                                <select className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-4 text-text-primary outline-none focus:border-purple-500 transition-all" value={assignData.empleado_id} onChange={e => setAssignData({ ...assignData, empleado_id: e.target.value })} required>
+                                    <option value="" className="bg-bg-card text-text-primary">Seleccionar responsable...</option>
                                     {empleados.filter(e => e.estado).map(emp => (
-                                        <option key={emp.id} value={emp.id} className="bg-[#0B0F1A]">{emp.nombre} {emp.apellido} — {emp.area?.nombre}</option>
+                                        <option key={emp.id} value={emp.id} className="bg-bg-card text-text-primary">{emp.nombre} {emp.apellido} — {emp.area?.nombre}</option>
                                     ))}
                                 </select>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Observaciones</label>
-                                <textarea className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-4 text-white outline-none h-24 resize-none" placeholder="Estado físico, accesorios incluidos..." value={assignData.notas} onChange={e => setAssignData({ ...assignData, notas: e.target.value })} />
+                                <label className="text-[10px] font-bold text-text-label uppercase tracking-widest ml-1">Observaciones</label>
+                                <textarea className="w-full bg-bg-input border border-border-app rounded-2xl py-4 px-4 text-text-primary outline-none h-24 resize-none focus:border-purple-500 placeholder:text-text-muted" placeholder="Estado físico, accesorios incluidos..." value={assignData.notas} onChange={e => setAssignData({ ...assignData, notas: e.target.value })} />
                             </div>
-                            <button type="submit" disabled={isSaving} className="w-full bg-purple-600 hover:bg-purple-500 text-white font-black py-5 rounded-2xl shadow-lg uppercase tracking-widest text-xs transition-all active:scale-95">
+                            <button type="submit" disabled={isSaving} className="w-full bg-purple-600 hover:bg-purple-500 text-white font-black py-5 rounded-2xl shadow-lg uppercase tracking-widest text-xs transition-all active:scale-95 cursor-pointer">
                                 {isSaving ? <Loader2 className="animate-spin mx-auto" /> : 'Confirmar Asignación'}
                             </button>
                         </form>

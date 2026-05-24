@@ -72,15 +72,33 @@ const Login = () => {
                 password: formData.password
             });
 
-            // Guardar sesión
-            sessionStorage.setItem('token', response.data.token);
-            sessionStorage.setItem('user', JSON.stringify(response.data.user));
+            // ─── EXTRACTOR ROBUSTO DE CAMPOS DE GO (MAYÚSCULAS Y MINÚSCULAS) ───
+            const token = response.data.token || response.data.Token || response.data.data?.token;
+            const user = response.data.user || response.data.User || response.data.usuario || response.data.Usuario || response.data.data?.user;
+
+            if (!token) {
+                console.error("El backend de Go no regresó un formato compatible de JWT.");
+                setStatus('error');
+                setErrorMessage('Error de sincronización con las claves del servidor.');
+                return;
+            }
+
+            // Normalizamos el objeto de usuario y forzamos su rol en mayúsculas
+            if (user) {
+                user.rol = (user.rol || user.Rol || user.role || user.Role || '').toUpperCase().trim();
+            }
+
+            // Guardado síncrono en el disco real
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user || {}));
+            // ─────────────────────────────────────────────────────────────────
+            
             setStatus('success');
 
-            // Redirección elegante tras éxito
+            // Redirección limpia destruyendo estados intermedios
             setTimeout(() => {
-                navigate('/dashboard');
-            }, 1500);
+                navigate('/dashboard', { replace: true });
+            }, 1000);
 
         } catch (err) {
             setStatus('error');

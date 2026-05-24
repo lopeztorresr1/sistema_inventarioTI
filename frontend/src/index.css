@@ -1,42 +1,158 @@
 @import "tailwindcss";
 
-/* 1. Variables de Tema Dinámicas */
-:root {
-  --bg-app: #f8fafc;
-  --bg-sidebar: #ffffff;
-  --text-main: #0f172a;
-  --border-app: #e2e8f0;
+/* 1. Mapeo de Variables para Tailwind CSS v4 */
+@theme {
+  /* Registramos tus variables dinámicas para que puedas usar clases como 'bg-app', 'text-primary', etc. */
+  --color-bg-app: var(--bg-app);
+  --color-bg-sidebar: var(--bg-sidebar);
+  --color-bg-card: var(--bg-card);
+  --color-bg-card-hover: var(--bg-card-hover);
+  --color-bg-input: var(--bg-input);
+  --color-bg-badge: var(--bg-badge);
+  
+  --color-border-app: var(--border);
+  --color-border-focus: var(--border-focus);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-label: var(--text-label);
+  
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-glow: var(--accent-glow);
+  
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
+  
+  --radius-custom: var(--radius);
 }
 
-.dark {
-  --bg-app: #030712;
-  --bg-sidebar: rgba(255, 255, 255, 0.02);
-  --text-main: #f8fafc;
-  --border-app: rgba(255, 255, 255, 0.05);
-}
-
-/* 2. Estilos Globales */
+/* 2. Estilos Globales Adaptativos */
 body {
   margin: 0;
   background-color: var(--bg-app) !important;
-  color: var(--text-main) !important;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  color: var(--text-primary) !important;
+  font-family: var(--font-sans);
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
   overflow-x: hidden;
 }
 
 #root {
   background-color: var(--bg-app);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* 3. Utilidades para el Dashboard */
+/* 3. CAPA DE INTERCEPCIÓN ABSOLUTA PARA EL MODO CORPORATIVO CLARO
+   Usa selectores de máxima prioridad para obligar a modales, portales e inputs a volverse claros */
+html.theme-light,
+html.theme-light body,
+html.theme-light div {
+
+  /* Fuerza a los textos blancos/grises claros a ser pizarra oscuro profundo */
+  .text-white, 
+  .text-slate-50, 
+  .text-slate-100, 
+  .text-slate-200, 
+  .text-slate-300,
+  .text-gray-100,
+  .text-gray-200,
+  .text-gray-300,
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary) !important;
+  }
+
+  /* Fuerza a las descripciones secundarias a ser legibles */
+  .text-slate-400, 
+  .text-slate-500,
+  .text-gray-400,
+  .text-gray-500 {
+    color: var(--text-secondary) !important;
+  }
+
+  /* Fuerza a las ventanas emergentes (modales) y tarjetas oscuras a tomar fondo blanco limpio */
+  .bg-\[\#030712\],
+  .bg-slate-900,
+  .bg-slate-950,
+  .bg-gray-900,
+  .bg-gray-950,
+  .bg-slate-800,
+  .bg-gray-800,
+  .bg-white\/\[0\.02\],
+  .bg-white\/5,
+  .bg-white\/10,
+  [role="dialog"],
+  [class*="modal"],
+  [class*="dialog"] {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border) !important;
+  }
+
+  /* Modifica las capas oscuras de fondo (overlays) detrás del modal por una elegante sombra traslúcida */
+  .bg-black\/50,
+  .bg-black\/40,
+  .bg-slate-950\/50,
+  .bg-black\/70,
+  .bg-black\/80,
+  .fixed.inset-0 {
+    background-color: rgba(15, 23, 42, 0.3) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+
+  /* Fuerza a los campos de texto, selectores e inputs dentro del modal a ser claros */
+  .bg-white\/\[0\.03\],
+  .bg-slate-800\/50,
+  .bg-gray-800,
+  .bg-slate-900\/50,
+  input,
+  select,
+  textarea {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+  }
+
+  /* Corrección de color para las opciones desplegables dentro de elementos <select> */
+  select option {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+  }
+
+  /* Placeholders legibles */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-muted) !important;
+  }
+
+  /* Hovers de tablas y listas en gris suave */
+  .hover\:bg-white\/\[0\.04\]:hover,
+  .hover\:bg-white\/5:hover,
+  .hover\:bg-slate-800:hover,
+  .hover\:bg-slate-700:hover {
+    background-color: var(--bg-card-hover) !important;
+  }
+
+  /* Limpieza de bordes oscuros en el modal */
+  .border-white\/\[0\.05\],
+  .border-white\/10,
+  .border-slate-800,
+  .border-gray-800,
+  .border-slate-700 {
+    border-color: var(--border) !important;
+  }
+}
+
+/* 4. Utilidades del Sistema de Inventario */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #2563eb; /* Blue 600 */
+  background: var(--scrollbar-thumb);
   border-radius: 10px;
 }
 
@@ -44,14 +160,16 @@ body {
   background: transparent;
 }
 
-/* Efecto de brillo neón para el modo oscuro */
-.dark .text-shadow-blue {
-  text-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+/* Brillo neón responsivo para el tema oscuro */
+.theme-dark .text-shadow-blue {
+  text-shadow: 0 0 15px var(--accent-glow);
 }
 
-/* Glassmorphism utility */
+/* Contenedores con efecto de transparencia profesional (Glassmorphism) */
 .glass {
-  background: var(--bg-sidebar);
+  background: var(--bg-card);
   backdrop-filter: blur(12px);
-  border: 1px solid var(--border-app);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
 }

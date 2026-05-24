@@ -1,62 +1,65 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 
-const FIVE_MINUTES = 5 * 60 * 1000; // 300,000 milisegundos
+const FIVE_MINUTES = 5 * 60 * 1000;
 
-export const IdleTimeoutHandler = ({ children }) => {
+export const IdleTimeoutHandler = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const timerRef = useRef(null);
 
     const handleLogout = () => {
-        // 1. Limpiamos el token y usuario de esta pestaña
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.clear();
 
-        // 2. Redirigimos al login
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
+
         navigate('/login', { replace: true });
     };
 
     const resetTimer = () => {
-        // Si hay un temporizador corriendo, lo cancelamos para iniciar uno nuevo
         if (timerRef.current) {
             clearTimeout(timerRef.current);
         }
-        
-        // Solo activamos el contador si el usuario NO está en la página de login
-        if (location.pathname !== '/login') {
-            timerRef.current = setTimeout(handleLogout, FIVE_MINUTES);
+
+        if (window.location.pathname === '/login') {
+            return;
         }
+
+        timerRef.current = setTimeout(handleLogout, FIVE_MINUTES);
     };
 
     useEffect(() => {
-        // Eventos del navegador que indican que el usuario está activo
-        const events = [
-            'mousemove',
-            'keydown',
-            'click',
-            'scroll',
-            'touchstart'
-        ];
+        if (location.pathname === '/login') {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
+            return;
+        }
 
-        // Arrancamos el temporizador la primera vez
+        const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+
         resetTimer();
 
-        // Escuchamos los eventos en la ventana del navegador
         events.forEach((event) => {
-            window.addEventListener(event, resetTimer);
+            window.addEventListener(event, resetTimer, { passive: true });
         });
 
-        // Limpieza de eventos y timers cuando el componente se desmonte
         return () => {
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
             }
+
             events.forEach((event) => {
                 window.removeEventListener(event, resetTimer);
             });
         };
-    }, [location.pathname]); // Se reinicia el efecto de forma segura si cambia la ruta
+    }, []);
 
-    return children;
+    return <Outlet />;
 };

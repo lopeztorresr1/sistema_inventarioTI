@@ -2,35 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, Monitor, Users, Settings, LogOut, ChevronLeft,
-    Box, MapPin, Tags, Cpu, Wrench, Layers, Users2, Sun, Moon, UserCog
+    Box, MapPin, Tags, Cpu, Wrench, Layers, Users2, UserCog, Palette
 } from 'lucide-react';
 import api from '../api/axios';
+import { applyTheme, THEMES } from '../theme/themes'; 
 
 const Sidebar = ({ children }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isDarkMode, setIsDarkMode]   = useState(() => {
+    
+    const [currentTheme, setCurrentTheme] = useState(() => {
         const saved = localStorage.getItem('theme');
-        return saved ? saved === 'dark' : true;
+        return saved && THEMES[saved] ? saved : 'dark';
     });
 
     const navigate  = useNavigate();
     const location  = useLocation();
 
-    // CAMBIA ESTA LÍNEA EXACTAMENTE:
-    const user      = JSON.parse(sessionStorage.getItem('user') || '{}');
+    // ─── CORRECCIÓN CRÍTICA DE ALMACENAMIENTO Y TOLERANCIA DE GO ───────────
+    const user      = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    // Mapeo seguro del rol (acepta 'rol', 'Rol', 'role') y lo fuerza a mayúsculas
+    const userRol   = (user.rol || user.Rol || user.role || user.Role || '').toUpperCase().trim();
+    const isAdmin   = userRol === 'ADMIN';
 
-    const isAdmin   = user.rol === 'ADMIN';
+    // Mapeo seguro del nombre del operador logueado
+    const userName  = user.nombre || user.Nombre || user.username || user.Username || user.email || 'Operador';
+    // ───────────────────────────────────────────────────────────────────────
 
     useEffect(() => {
-    const root = window.document.documentElement;
-    if (isDarkMode) {
-        root.classList.add('dark');
-        localStorage.setItem('theme', 'dark'); // Este se queda en localStorage, está perfecto
-    } else {
-        root.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-    }
-}, [isDarkMode]);
+        applyTheme(currentTheme);
+    }, [currentTheme]);
 
     const menuGroups = [
         {
@@ -64,7 +65,6 @@ const Sidebar = ({ children }) => {
                 { name: 'Reparaciones', icon: <Wrench size={20}/>, path: '/reparaciones' },
             ]
         },
-        // El grupo de Administración solo aparece si el usuario es ADMIN
         ...(isAdmin ? [{
             label: 'Administración',
             items: [
@@ -75,47 +75,53 @@ const Sidebar = ({ children }) => {
 
     const handleLogout = async () => {
         try {
-            // Registra el cierre de sesión en el backend antes de limpiar el token
             await api.post('/auth/logout');
         } catch {
-            // Si falla (token ya expirado, etc.) continuamos con el logout local
+            // Continuar con borrado local si falla la red
         } finally {
-            localStorage.clear();
+            // ─── CORRECCIÓN DE LOGOUT LIMPIO ───────────────────────────────
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            sessionStorage.clear(); // Por seguridad si quedaban rastros viejos
             navigate('/login');
         }
+    };
+
+    const rotateTheme = () => {
+        const order = ['dark', 'light', 'matrix'];
+        const nextIndex = (order.indexOf(currentTheme) + 1) % order.length;
+        setCurrentTheme(order[nextIndex]);
     };
 
     const isActive = (path) => location.pathname === path;
 
     return (
-        <div className={`flex min-h-screen transition-colors duration-500 ${isDarkMode ? 'bg-[#030712] text-slate-300' : 'bg-slate-50 text-slate-900'}`}>
+        <div className="flex min-h-screen transition-colors duration-500 bg-bg-app text-text-primary">
 
-            {/* SIDEBAR */}
+            {/* BARRA LATERAL */}
             <aside className={`relative border-r transition-all duration-500 ease-in-out flex flex-col shadow-2xl z-20 ${
                 isCollapsed ? 'w-20' : 'w-64'
-            } ${isDarkMode ? 'bg-white/[0.02] border-white/[0.05] backdrop-blur-xl' : 'bg-white border-slate-200'}`}>
+            } bg-bg-sidebar border-border-app`}>
 
-                {/* LOGO */}
-                <div className={`p-6 flex items-center gap-3 border-b h-20 shrink-0 ${isDarkMode ? 'border-white/[0.05]' : 'border-slate-100'}`}>
-                    <div className="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-600/30 shrink-0">
+                {/* LOGO INSTITUCIONAL */}
+                <div className="p-6 flex items-center gap-3 border-b border-border-app h-20 shrink-0">
+                    <div className="bg-accent p-2 rounded-xl text-white shadow-lg shadow-accent/30 shrink-0 transition-colors duration-500">
                         <Box size={24}/>
                     </div>
                     {!isCollapsed && (
-                        <span className={`font-black tracking-tighter text-lg whitespace-nowrap italic ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-                            INVENTARIO <span className="text-blue-500">TI</span>
+                        <span className="font-black tracking-tighter text-lg whitespace-nowrap italic text-text-primary">
+                            INVENTARIO <span className="text-accent transition-colors duration-500">TI</span>
                         </span>
                     )}
                 </div>
 
-                {/* NAV */}
+                {/* MENÚS DE NAVEGACIÓN */}
                 <nav className="flex-1 overflow-y-auto overflow-x-hidden py-6 custom-scrollbar scroll-smooth">
                     {menuGroups.map((group, idx) => (
                         <div key={idx} className="mb-8">
                             {!isCollapsed && (
                                 <p className={`px-8 mb-3 text-[10px] font-black uppercase tracking-[0.25em] ${
-                                    group.label === 'Administración'
-                                        ? 'text-amber-600/70'
-                                        : isDarkMode ? 'text-slate-600' : 'text-slate-400'
+                                    group.label === 'Administración' ? 'text-amber-500' : 'text-text-muted'
                                 }`}>
                                     {group.label}
                                 </p>
@@ -125,18 +131,16 @@ const Sidebar = ({ children }) => {
                                     <button
                                         key={item.name}
                                         onClick={() => navigate(item.path)}
-                                        className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all duration-300 group relative ${
+                                        className={`w-full flex items-center gap-3 p-3 rounded-custom transition-all duration-300 group relative cursor-pointer ${
                                             isActive(item.path)
-                                                ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20 shadow-[inset_0_0_15px_rgba(37,99,235,0.05)]'
-                                                : isDarkMode
-                                                    ? 'text-slate-500 hover:text-white hover:bg-white/[0.04]'
-                                                    : 'text-slate-600 hover:text-blue-600 hover:bg-slate-100'
+                                                ? 'bg-accent/10 text-accent border border-accent/20'
+                                                : 'text-text-secondary hover:text-text-primary hover:bg-bg-card-hover'
                                         }`}
                                     >
                                         {isActive(item.path) && (
-                                            <div className="absolute left-0 w-1 h-6 bg-blue-600 rounded-r-full shadow-[0_0_10px_#2563eb]"/>
+                                            <div className="absolute left-0 w-1 h-6 bg-accent rounded-r-full shadow-[0_0_10px_var(--accent)]"/>
                                         )}
-                                        <span className={`shrink-0 transition-transform duration-300 ${isActive(item.path) ? 'scale-110' : 'group-hover:scale-110 group-hover:text-blue-600'}`}>
+                                        <span className={`shrink-0 transition-transform duration-300 ${isActive(item.path) ? 'scale-110' : 'group-hover:scale-110'}`}>
                                             {item.icon}
                                         </span>
                                         {!isCollapsed && (
@@ -149,63 +153,75 @@ const Sidebar = ({ children }) => {
                     ))}
                 </nav>
 
-                {/* FOOTER */}
-                <div className={`p-4 border-t shrink-0 ${isDarkMode ? 'border-white/[0.05] bg-white/[0.01]' : 'border-slate-100 bg-slate-50/50'}`}>
+                {/* PIE DE PÁGINA (OPERADOR VINCULADO AL LOCALSTORAGE) */}
+                <div className="p-4 border-t border-border-app bg-bg-card-hover shrink-0">
                     {!isCollapsed && (
                         <div className="px-4 mb-4">
-                            <p className={`text-[9px] font-black uppercase tracking-[0.2em] ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>Operador</p>
-                            <p className={`text-sm font-black truncate ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
-                                {user.nombre || '—'}
+                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-text-muted">Operador</p>
+                            <p className="text-sm font-black truncate text-text-primary">
+                                {userName}
                             </p>
-                            {/* Badge de rol en el footer */}
                             <span className={`mt-1 inline-block text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                                isAdmin
-                                    ? 'text-amber-400 bg-amber-400/10'
-                                    : 'text-blue-400 bg-blue-400/10'
+                                isAdmin ? 'text-amber-400 bg-amber-400/10' : 'text-accent bg-accent/10'
                             }`}>
                                 {isAdmin ? '⚡ Admin' : '👁 Solo lectura'}
                             </span>
                         </div>
                     )}
 
-                    {/* THEME TOGGLE */}
-                    <button
-                        onClick={() => setIsDarkMode(!isDarkMode)}
-                        className={`w-full flex items-center gap-3 p-3 mb-2 rounded-xl transition-all duration-300 ${isDarkMode ? 'text-slate-400 hover:bg-white/5 hover:text-white' : 'text-slate-600 hover:bg-slate-200'}`}
-                    >
-                        {isDarkMode
-                            ? <Sun size={20} className="text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]"/>
-                            : <Moon size={20} className="text-blue-600"/>
-                        }
-                        {!isCollapsed && <span className="font-black text-[11px] uppercase tracking-widest">Modo {isDarkMode ? 'Claro' : 'Oscuro'}</span>}
-                    </button>
+                    {/* SELECTOR DE TEMAS */}
+                    <div className="mb-2 px-2">
+                        {isCollapsed ? (
+                            <button
+                                onClick={rotateTheme}
+                                className="w-full flex items-center justify-center p-3 rounded-xl bg-bg-input border border-border-app text-accent hover:bg-bg-app transition-all shadow-sm cursor-pointer"
+                                title={`Tema actual: ${THEMES[currentTheme]?.label}`}
+                            >
+                                <span className="text-lg leading-none">{THEMES[currentTheme]?.emoji}</span>
+                            </button>
+                        ) : (
+                            <div className="relative flex items-center bg-bg-input border border-border-app rounded-xl px-3 py-2.5 focus-within:border-accent transition-all">
+                                <Palette size={16} className="text-text-muted mr-2 shrink-0" />
+                                <select
+                                    value={currentTheme}
+                                    onChange={(e) => setCurrentTheme(e.target.value)}
+                                    className="w-full bg-transparent text-xs font-bold uppercase tracking-wider text-text-primary outline-none appearance-none pr-4 cursor-pointer"
+                                >
+                                    {Object.entries(THEMES).map(([key, t]) => (
+                                        <option key={key} value={key} className="bg-bg-card text-text-primary font-bold">
+                                            {t.emoji} {t.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-3 pointer-events-none text-[8px] text-text-muted">▼</div>
+                            </div>
+                        )}
+                    </div>
 
-                    {/* LOGOUT */}
+                    {/* BOTÓN DE CIERRE DE SESIÓN */}
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 p-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-all group"
+                        className="w-full flex items-center gap-3 p-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-all group cursor-pointer"
                     >
                         <LogOut size={20} className="group-hover:-translate-x-1 transition-transform"/>
                         {!isCollapsed && <span className="font-black text-[11px] uppercase tracking-widest">Cerrar Sesión</span>}
                     </button>
                 </div>
 
-                {/* TOGGLE BUTTON */}
+                {/* BOTÓN DE COLAPSADO */}
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="absolute -right-3 top-10 bg-blue-600 text-white rounded-full p-1.5 border-2 border-slate-50 dark:border-[#030712] hover:scale-110 transition-all z-50 shadow-xl"
+                    className="absolute -right-3 top-10 bg-accent text-white rounded-full p-1.5 border-2 border-bg-app hover:scale-110 transition-all z-50 shadow-xl cursor-pointer"
                 >
                     {isCollapsed ? <ChevronLeft size={12} className="rotate-180"/> : <ChevronLeft size={12}/>}
                 </button>
             </aside>
 
-            {/* MAIN */}
-            <main className={`flex-1 h-screen overflow-auto relative transition-colors duration-500 ${isDarkMode ? 'bg-[#030712]' : 'bg-slate-50'}`}>
-                <div className={`absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none transition-opacity duration-1000 ${isDarkMode ? 'bg-blue-600/5 opacity-100' : 'bg-blue-600/10 opacity-40'}`}/>
-                <div className={`relative z-10 p-10 max-w-[1600px] mx-auto transition-all duration-500
-                    ${isDarkMode
-                        ? '[&_h1]:text-white [&_h2]:text-white [&_p]:text-slate-400 [&_td]:text-slate-300'
-                        : '[&_h1]:text-slate-900 [&_h2]:text-slate-900 [&_p]:text-slate-600 [&_td]:text-slate-800'}`}>
+            {/* CONTENEDOR PRINCIPAL */}
+            <main className="flex-1 h-screen overflow-auto relative transition-colors duration-500 bg-bg-app">
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none transition-opacity duration-1000 bg-accent/5 opacity-40"/>
+                <div className="relative z-10 p-10 max-w-[1600px] mx-auto transition-all duration-500 text-text-primary
+                    [&_h1]:text-text-primary [&_h2]:text-text-primary [&_p]:text-text-secondary [&_td]:text-text-secondary [&_th]:text-text-primary">
                     {children}
                 </div>
             </main>

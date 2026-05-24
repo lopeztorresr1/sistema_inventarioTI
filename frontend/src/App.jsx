@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
-import ProtectedRoute from './components/ProtectedRoute';
-import { IdleTimeoutHandler } from './components/IdleTimeoutHandler'; // <-- AGREGADO: Importamos el detector
+import ProtectedRoute from './pages/ProtectedRoute';
+import { IdleTimeoutHandler } from './components/IdleTimeoutHandler';
 import Dashboard from './pages/Dashboard';
 import Marcas from './pages/Marcas';
 import Sucursales from './pages/Sucursales';
@@ -15,39 +15,38 @@ import Asignaciones from './pages/Asignaciones';
 import Reparaciones from './pages/Reparaciones';
 import Usuarios from './pages/Usuarios';
 
-// Rutas normales (cualquier usuario autenticado)
-const Protect = ({ children }) => <ProtectedRoute>{children}</ProtectedRoute>;
-
-// Rutas exclusivas de administrador
-const AdminRoute = ({ children }) => <ProtectedRoute adminOnly>{children}</ProtectedRoute>;
-
 function App() {
     return (
         <BrowserRouter>
-            {/* <-- AGREGADO: Envolvemos todas las rutas con el detector de inactividad */}
-            <IdleTimeoutHandler>
-                <Routes>
-                    <Route path="/login" element={<Login />} />
+            <Routes>
+                <Route path="/login" element={<Login />} />
 
-                    <Route path="/dashboard"    element={<Protect><Dashboard /></Protect>} />
-                    <Route path="/inventario"   element={<Protect><Inventario /></Protect>} />
-                    <Route path="/asignaciones" element={<Protect><Asignaciones /></Protect>} />
-                    <Route path="/reparaciones" element={<Protect><Reparaciones /></Protect>} />
-                    <Route path="/empleados"    element={<Protect><Empleados /></Protect>} />
-                    <Route path="/areas"        element={<Protect><Areas /></Protect>} />
-                    <Route path="/sucursales"   element={<Protect><Sucursales /></Protect>} />
-                    <Route path="/grupos"       element={<Protect><Grupos /></Protect>} />
-                    <Route path="/marcas"       element={<Protect><Marcas /></Protect>} />
-                    <Route path="/modelos"      element={<Protect><Modelos /></Protect>} />
-                    <Route path="/tipos-equipo" element={<Protect><TiposEquipo /></Protect>} />
+                {/* ESTRUCTURA DE LAYOUT ANIDADO */}
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<IdleTimeoutHandler />}>
+                        <Route path="/dashboard"    element={<Dashboard />} />
+                        <Route path="/inventario"   element={<Inventario />} />
+                        <Route path="/asignaciones" element={<Asignaciones />} />
+                        <Route path="/reparaciones" element={<Reparaciones />} />
+                        <Route path="/empleados"    element={<Empleados />} />
+                        <Route path="/areas"        element={<Areas />} />
+                        <Route path="/sucursales"   element={<Sucursales />} />
+                        <Route path="/grupos"       element={<Grupos />} />
+                        <Route path="/marcas"       element={<Marcas />} />
+                        <Route path="/modelos"      element={<Modelos />} />
+                        <Route path="/tipos-equipo" element={<TiposEquipo />} />
+                    </Route>
+                </Route>
 
-                    {/* Solo ADMIN — VIEWER es redirigido al dashboard */}
-                    <Route path="/usuarios" element={<AdminRoute><Usuarios /></AdminRoute>} />
+                <Route element={<ProtectedRoute adminOnly />}>
+                    <Route element={<IdleTimeoutHandler />}>
+                        <Route path="/usuarios" element={<Usuarios />} />
+                    </Route>
+                </Route>
 
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                </Routes>
-            </IdleTimeoutHandler>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
         </BrowserRouter>
     );
 }

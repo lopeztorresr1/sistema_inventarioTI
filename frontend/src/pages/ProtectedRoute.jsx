@@ -1,23 +1,25 @@
-import { Navigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
 
-// ProtectedRoute valida que:
-//   1. El usuario esté autenticado (tiene token)
-//   2. Si la ruta requiere un rol específico (adminOnly), que el usuario lo tenga
-
-const ProtectedRoute = ({ children, adminOnly = false }) => {
+const ProtectedRoute = ({ adminOnly = false }) => {
     const token = localStorage.getItem('token');
-    const user  = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+    // 1. Si no hay token, el usuario NO está logueado
     if (!token) {
         return <Navigate to="/login" replace />;
     }
 
-    if (adminOnly && user.rol !== 'ADMIN') {
-        // El usuario está autenticado pero no tiene permisos: manda al dashboard
+    // 2. Validación de rol con tolerancia a formatos de Go
+    const userRol = (user.rol || user.Rol || user.role || '').toUpperCase().trim();
+    
+    if (adminOnly && userRol !== 'ADMIN') {
         return <Navigate to="/dashboard" replace />;
     }
 
-    return children;
+    // 3. Outlet renderiza los componentes hijos (Dashboard, Inventario, etc.) 
+    // de forma directa y sin re-validar el padre en cada movimiento.
+    return <Outlet />;
 };
 
 export default ProtectedRoute;

@@ -25,7 +25,6 @@ func GetUsuarios(c *gin.Context) {
 }
 
 // CreateUsuario crea un nuevo usuario del sistema.
-// Solo puede ejecutarlo un ADMIN (protegido con AdminOnly en main.go).
 func CreateUsuario(c *gin.Context) {
 	var input struct {
 		Nombre   string `json:"nombre"   binding:"required"`
@@ -65,7 +64,7 @@ func CreateUsuario(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Usuario creado correctamente", "id": usuario.ID})
 }
 
-// UpdateUsuario permite cambiar nombre, email y rol. No toca la contraseña.
+// UpdateUsuario permite cambiar nombre, email y rol.
 func UpdateUsuario(c *gin.Context) {
 	id := c.Param("id")
 	var usuario models.Usuario
@@ -107,9 +106,8 @@ func UpdateUsuario(c *gin.Context) {
 func ToggleUsuario(c *gin.Context) {
 	id := c.Param("id")
 
-	// No permitir que el admin se desactive a sí mismo
 	callerID, _ := c.Get("user_id")
-	if fmt_id := id; fmt_id == callerID {
+	if fmt_uint(callerID) == id {
 		c.JSON(http.StatusForbidden, gin.H{"error": "No puedes desactivar tu propia cuenta"})
 		return
 	}
@@ -133,7 +131,7 @@ func ToggleUsuario(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": msg, "activo": nuevoEstado})
 }
 
-// ResetPassword permite al admin establecer una nueva contraseña para cualquier usuario.
+// ResetPassword permite al admin establecer una nueva contraseña.
 func ResetPassword(c *gin.Context) {
 	id := c.Param("id")
 	var input struct {
@@ -163,8 +161,7 @@ func ResetPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Contraseña actualizada correctamente"})
 }
 
-// ChangeOwnPassword permite a cualquier usuario cambiar su propia contraseña
-// verificando primero la actual.
+// ChangeOwnPassword permite cambiar la propia contraseña.
 func ChangeOwnPassword(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	var input struct {
@@ -188,14 +185,12 @@ func ChangeOwnPassword(c *gin.Context) {
 	}
 
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)
-	database.DB.Model(&usuario).Update("password", string(hashed))
+	database.DB.Model(&models.Usuario{}).Where("id = ?", userID).Update("password", string(hashed))
 	c.JSON(http.StatusOK, gin.H{"message": "Contraseña actualizada"})
 }
 
 // ─── Sesiones ────────────────────────────────────────────────────────────────
 
-// RegisterSession registra el inicio de sesión de un usuario.
-// Se llama internamente desde el handler de Login.
 func RegisterSession(db *gorm.DB, usuarioID uint, ip string) {
 	session := models.Sesion{
 		UsuarioID: usuarioID,
@@ -206,27 +201,33 @@ func RegisterSession(db *gorm.DB, usuarioID uint, ip string) {
 	db.Create(&session)
 }
 
-// CloseSession registra el cierre de sesión y marca la sesión como inactiva.
+// CloseSession registra el cierre de sesión y marca todas las sesiones activas del usuario como inactivas.
 func CloseSession(c *gin.Context) {
-	userID, _ := c.Get("user_id")
+	userID, exists := c.Get("user_id")
+	if !exists || fmt_uint(userID) == "0" || fmt_uint(userID) == "" {
+		c.JSON(http.StatusOK, gin.H{"message": "Sesión limpiada localmente"})
+		return
+	}
 
-	var sesion models.Sesion
-	err := database.DB.
-		Where("usuario_id = ? AND activa = true", userID).
-		Order("login_at DESC").
-		First(&sesion).Error
+	ahora := time.Now()
 
-	if err == nil {
-		ahora := time.Now()
-		database.DB.Model(&sesion).Updates(map[string]interface{}{
+	// Actualización masiva segura: tumba cualquier sesión colgada para evitar bloqueos futuros
+	err := database.DB.Model(&models.Sesion{}).
+		Where("usuario_id = ? AND activa = ?", userID, true).
+		Updates(map[string]interface{}{
 			"logout_at": &ahora,
 			"activa":    false,
-		})
+		}).Error
+
+	if err != nil {
+		println("❌ ERROR AL CERRAR SESIONES EN BD:", err.Error())
+	} else {
+		println("✅ TODAS LAS SESIONES ACTIVAS DESTRUIDAS EN BD PARA USUARIO ID:", fmt_uint(userID))
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Sesión cerrada"})
 }
 
-// GetSesiones devuelve el historial de sesiones de un usuario específico.
 func GetSesiones(c *gin.Context) {
 	usuarioID := c.Param("id")
 	var sesiones []models.Sesion
@@ -238,18 +239,16 @@ func GetSesiones(c *gin.Context) {
 	c.JSON(http.StatusOK, sesiones)
 }
 
-// GetSessionsOnline devuelve los usuarios con sesión activa en este momento.
 func GetSessionsOnline(c *gin.Context) {
 	type OnlineUser struct {
-		SesionID  uint      `json:"sesion_id"`
-		UsuarioID uint      `json:"usuario_id"`
-		Nombre    string    `json:"nombre"`
-		Email     string    `json:"email"`
-		Rol       string    `json:"rol"`
-		IP        string    `json:"ip"`
-		LoginAt   time.Time `json:"login_at"`
-		// Minutos conectado calculado en Go para no depender de funciones SQL específicas
-		MinutosConectado int64 `json:"minutos_conectado"`
+		SesionID         uint      `json:"sesion_id"`
+		UsuarioID        uint      `json:"usuario_id"`
+		Nombre           string    `json:"nombre"`
+		Email            string    `json:"email"`
+		Rol              string    `json:"rol"`
+		IP               string    `json:"ip"`
+		LoginAt          time.Time `json:"login_at"`
+		MinutosConectado int64     `json:"minutos_conectado"`
 	}
 
 	var sesiones []models.Sesion
@@ -274,13 +273,11 @@ func GetSessionsOnline(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// DeleteUsuario elimina permanentemente un usuario (solo ADMIN).
 func DeleteUsuario(c *gin.Context) {
 	id := c.Param("id")
 	callerID, _ := c.Get("user_id")
 
-	// Convertir callerID (float64 desde JWT claims) a string para comparar
-	if callerIDStr := fmt_uint(callerID); callerIDStr == id {
+	if fmt_uint(callerID) == id {
 		c.JSON(http.StatusForbidden, gin.H{"error": "No puedes eliminar tu propia cuenta"})
 		return
 	}
@@ -295,7 +292,6 @@ func DeleteUsuario(c *gin.Context) {
 		return
 	}
 
-	// Cerrar sesiones activas antes de borrar
 	database.DB.Model(&models.Sesion{}).
 		Where("usuario_id = ? AND activa = true", id).
 		Updates(map[string]interface{}{"activa": false})
@@ -307,7 +303,6 @@ func DeleteUsuario(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Usuario eliminado"})
 }
 
-// fmt_uint convierte el user_id del JWT (float64) a string para comparar con Param("id")
 func fmt_uint(v interface{}) string {
 	switch val := v.(type) {
 	case float64:

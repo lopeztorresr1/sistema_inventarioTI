@@ -18,4 +18,14 @@ type Sesion struct {
 	// Se pone en false también cuando el token expira (el interceptor de axios
 	// redirige al login y llama a /auth/logout).
 	Activa bool `gorm:"default:true;index" json:"activa"`
+
+	// ─── CAMPO VIRTUAL CALCULADO ─────────────────────────────────────────
+	// El tag `gorm:"-"` le dice a GORM que ignore esta columna en la BD,
+	// pero permite que viaje como JSON hacia el Frontend en React.
+	MinutosConectado int `gorm:"-" json:"minutos_conectado"`
+}
+
+// TableName obliga a GORM a usar el nombre exacto que tienes en MySQL Workbench
+func (Sesion) TableName() string {
+	return "sesions"
 }

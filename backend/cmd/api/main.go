@@ -29,7 +29,6 @@ func main() {
 	r := gin.Default()
 
 	// 4. CORS dinámico desde variable de entorno
-	// Ejemplo en .env: ALLOWED_ORIGINS=http://localhost:5173,https://mi-app.com
 	rawOrigins := os.Getenv("ALLOWED_ORIGINS")
 	allowedOrigins := strings.Split(rawOrigins, ",")
 	if len(allowedOrigins) == 0 || allowedOrigins[0] == "" {
@@ -47,95 +46,97 @@ func main() {
 
 	v1 := r.Group("/api/v1")
 	{
-		// --- Rutas PÚBLICAS (sin autenticación) ---
+		// ─── RUTAS PÚBLICAS (SIN AUTENTICACIÓN) ──────────────────────────────
 		auth := v1.Group("/auth")
 		{
 			auth.POST("/register", handlers.Register)
 			auth.POST("/login", handlers.Login)
 		}
 
-		// --- Rutas PROTEGIDAS (requieren JWT válido) ---
+		// ─── RUTAS PROTEGIDAS (REQUIEREN JWT VÁLIDO) ─────────────────────────
 		protected := v1.Group("/")
 		protected.Use(middleware.AuthMiddleware())
 		{
-			// Sucursales y Estructura
-			protected.POST("/sucursales", handlers.CreateSucursal)
+			// 🔓 ACCESIBLES POR CUALQUIER ROL (ADMIN y VIEWER)
+			// Dashboard y Consultas Globales
+			protected.GET("/dashboard/stats", handlers.GetDashboardStats)
 			protected.GET("/sucursales", handlers.GetSucursales)
-			protected.PUT("/sucursales/:id", handlers.UpdateSucursal)
-			protected.DELETE("/sucursales/:id", handlers.DeleteSucursal)
-
-			protected.POST("/grupos", handlers.CreateGrupo)
 			protected.GET("/grupos", handlers.GetGrupos)
-			protected.PUT("/grupos/:id", handlers.UpdateGrupo)
-			protected.DELETE("/grupos/:id", handlers.DeleteGrupo)
-
-			protected.POST("/areas", handlers.CreateArea)
 			protected.GET("/areas", handlers.GetAreas)
-			protected.PUT("/areas/:id", handlers.UpdateArea)
-			protected.DELETE("/areas/:id", handlers.DeleteArea)
-
-			// Catálogo de Hardware
-			protected.POST("/tipos-equipo", handlers.CreateTipoEquipo)
 			protected.GET("/tipos-equipo", handlers.GetTiposEquipo)
-			protected.PUT("/tipos-equipo/:id", handlers.UpdateTipoEquipo)
-			protected.DELETE("/tipos-equipo/:id", handlers.DeleteTipoEquipo)
-
-			protected.POST("/marcas", handlers.CreateMarca)
 			protected.GET("/marcas", handlers.GetMarcas)
-			protected.PUT("/marcas/:id", handlers.UpdateMarca)
-			protected.DELETE("/marcas/:id", handlers.DeleteMarca)
-
-			protected.POST("/modelos", handlers.CreateModeloEquipo)
 			protected.GET("/modelos", handlers.GetModelosEquipo)
-			protected.PUT("/modelos/:id", handlers.UpdateModeloEquipo)
-			protected.DELETE("/modelos/:id", handlers.DeleteModeloEquipo)
 
-			// Gestión de Personal
-			protected.POST("/empleados", handlers.CreateEmpleado)
+			// Consulta de Personal e Inventario
 			protected.GET("/empleados", handlers.GetEmpleados)
-			protected.PUT("/empleados/:id", handlers.UpdateEmpleado)
-			protected.DELETE("/empleados/:id", handlers.DeleteEmpleado)
 			protected.GET("/empleados/:id/activos", handlers.GetAsignacionesByEmpleado)
 			protected.GET("/empleados/:id/historial", handlers.GetHistorialEmpleado)
-
-			// Gestión de Equipos (Inventario)
-			protected.POST("/equipos", handlers.CreateEquipo)
-			protected.GET("/equipos", handlers.GetEquipos) // soporta ?page=1&limit=20
+			protected.GET("/equipos", handlers.GetEquipos)
 			protected.GET("/equipos/:id", handlers.GetDetalleEquipo)
-			protected.PUT("/equipos/:id", handlers.UpdateEquipo)
-			protected.DELETE("/equipos/:id/baja", handlers.BajaEquipo)
-			protected.PATCH("/equipos/:id/reactivar", handlers.ReactivarEquipo)
-			protected.PUT("/equipos/:id/desasignar", handlers.DesasignarEquipo)
 			protected.GET("/equipos/:id/historial", handlers.GetHistorialEquipo)
-
-			// Movimientos y Asignaciones
-			protected.POST("/asignaciones", handlers.CreateAsignacion)
 			protected.GET("/asignaciones", handlers.GetAsignaciones)
-			protected.PUT("/asignaciones/:id/finalizar", handlers.FinalizarAsignacion)
-
-			// Mantenimiento
-			protected.POST("/reparaciones", handlers.CreateReparacion)
 			protected.GET("/reparaciones", handlers.GetReparaciones)
-			protected.PUT("/reparaciones/:id/finalizar", handlers.FinalizarReparacion)
 
-			// Dashboard
-			protected.GET("/dashboard/stats", handlers.GetDashboardStats)
-
-			// Sesiones (cierre propio + cambio de contraseña propio — cualquier usuario)
+			// Acciones de Perfil Propio
 			protected.POST("/auth/logout", handlers.CloseSession)
 			protected.PUT("/auth/change-password", handlers.ChangeOwnPassword)
 
-			// Usuarios en línea (cualquier admin puede verlos)
-			protected.GET("/usuarios/online", middleware.AdminOnly(), handlers.GetSessionsOnline)
+			// 🔒 EXCLUSIVAS PARA ADMINISTRADORES (Inyección explícita del middleware)
+			admin := middleware.AdminOnly()
+			{
+				// Estructura y Catálogos (Escritura)
+				protected.POST("/sucursales", admin, handlers.CreateSucursal)
+				protected.PUT("/sucursales/:id", admin, handlers.UpdateSucursal)
+				protected.DELETE("/sucursales/:id", admin, handlers.DeleteSucursal)
 
-			// Gestión completa de usuarios — solo ADMIN
-			protected.GET("/usuarios", middleware.AdminOnly(), handlers.GetUsuarios)
-			protected.POST("/usuarios", middleware.AdminOnly(), handlers.CreateUsuario)
-			protected.PUT("/usuarios/:id", middleware.AdminOnly(), handlers.UpdateUsuario)
-			protected.PATCH("/usuarios/:id/toggle", middleware.AdminOnly(), handlers.ToggleUsuario)
-			protected.PUT("/usuarios/:id/reset-password", middleware.AdminOnly(), handlers.ResetPassword)
-			protected.DELETE("/usuarios/:id", middleware.AdminOnly(), handlers.DeleteUsuario)
-			protected.GET("/usuarios/:id/sesiones", middleware.AdminOnly(), handlers.GetSesiones)
+				protected.POST("/grupos", admin, handlers.CreateGrupo)
+				protected.PUT("/grupos/:id", admin, handlers.UpdateGrupo)
+				protected.DELETE("/grupos/:id", admin, handlers.DeleteGrupo)
+
+				protected.POST("/areas", admin, handlers.CreateArea)
+				protected.PUT("/areas/:id", admin, handlers.UpdateArea)
+				protected.DELETE("/areas/:id", admin, handlers.DeleteArea)
+
+				protected.POST("/tipos-equipo", admin, handlers.CreateTipoEquipo)
+				protected.PUT("/tipos-equipo/:id", admin, handlers.UpdateTipoEquipo)
+				protected.DELETE("/tipos-equipo/:id", admin, handlers.DeleteTipoEquipo)
+
+				protected.POST("/marcas", admin, handlers.CreateMarca)
+				protected.PUT("/marcas/:id", admin, handlers.UpdateMarca)
+				protected.DELETE("/marcas/:id", admin, handlers.DeleteMarca)
+
+				protected.POST("/modelos", admin, handlers.CreateModeloEquipo)
+				protected.PUT("/modelos/:id", admin, handlers.UpdateModeloEquipo)
+				protected.DELETE("/modelos/:id", admin, handlers.DeleteModeloEquipo)
+
+				// Gestión de Operaciones y Personal
+				protected.POST("/empleados", admin, handlers.CreateEmpleado)
+				protected.PUT("/empleados/:id", admin, handlers.UpdateEmpleado)
+				protected.DELETE("/empleados/:id", admin, handlers.DeleteEmpleado)
+
+				// Gestión de Inventario (Mutaciones)
+				protected.POST("/equipos", admin, handlers.CreateEquipo)
+				protected.PUT("/equipos/:id", admin, handlers.UpdateEquipo)
+				protected.DELETE("/equipos/:id/baja", admin, handlers.BajaEquipo)
+				protected.PATCH("/equipos/:id/reactivar", admin, handlers.ReactivarEquipo)
+				protected.PUT("/equipos/:id/desasignar", admin, handlers.DesasignarEquipo)
+
+				// Flujos de Negocio (Asignaciones y Taller)
+				protected.POST("/asignaciones", admin, handlers.CreateAsignacion)
+				protected.PUT("/asignaciones/:id/finalizar", admin, handlers.FinalizarAsignacion)
+				protected.POST("/reparaciones", admin, handlers.CreateReparacion)
+				protected.PUT("/reparaciones/:id/finalizar", admin, handlers.FinalizarReparacion)
+
+				// Control de Usuarios y Auditoría de Sesiones
+				protected.GET("/usuarios/online", admin, handlers.GetSessionsOnline)
+				protected.GET("/usuarios", admin, handlers.GetUsuarios)
+				protected.POST("/usuarios", admin, handlers.CreateUsuario)
+				protected.PUT("/usuarios/:id", admin, handlers.UpdateUsuario)
+				protected.PATCH("/usuarios/:id/toggle", admin, handlers.ToggleUsuario)
+				protected.PUT("/usuarios/:id/reset-password", admin, handlers.ResetPassword)
+				protected.DELETE("/usuarios/:id", admin, handlers.DeleteUsuario)
+				protected.GET("/usuarios/:id/sesiones", admin, handlers.GetSesiones)
+			}
 		}
 	}
 

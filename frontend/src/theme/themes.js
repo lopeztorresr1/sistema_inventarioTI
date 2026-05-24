@@ -12,28 +12,28 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const THEMES = {
-  dark: {
-    label: 'Oscuro',
-    emoji: '🌑',
-    // Fondos
-    '--bg-app':          '#030712',
-    '--bg-sidebar':      'rgba(255,255,255,0.018)',
-    '--bg-card':         'rgba(255,255,255,0.025)',
-    '--bg-card-hover':   'rgba(255,255,255,0.04)',
-    '--bg-input':        'rgba(255,255,255,0.03)',
-    '--bg-badge':        'rgba(255,255,255,0.06)',
-    // Bordes
-    '--border':          'rgba(255,255,255,0.07)',
-    '--border-focus':    'rgba(59,130,246,0.5)',
-    // Texto
-    '--text-primary':    '#f1f5f9',
-    '--text-secondary':  '#94a3b8',
-    '--text-muted':      '#475569',
-    '--text-label':      '#64748b',
-    // Acento
-    '--accent':          '#2563eb',
-    '--accent-hover':    '#3b82f6',
-    '--accent-glow':     'rgba(37,99,235,0.25)',
+dark: {
+    label: 'Oscuro Neón',
+    emoji: '🌌',
+    // Fondos: Negro profundo OLED con Gris Oscuro SÓLIDO para evitar fallos en selectores
+    '--bg-app':          '#020617',          // Azul/Negro espacio profundo (slate-950)
+    '--bg-sidebar':      '#0b1329',          // Capa sólida oscura para el lateral
+    '--bg-card':         '#0f172a',          // Color SÓLIDO (slate-900). Esto repara el fondo blanco del selector
+    '--bg-card-hover':   '#1e293b',          // Hover sólido para resaltar opciones (slate-800)
+    '--bg-input':        '#020617',          // Fondo de inputs oscuro puro
+    '--bg-badge':        'rgba(6, 182, 212, 0.15)', // Fondo de etiquetas traslúcido cian neón
+    // Bordes: Finos con destellos eléctricos
+    '--border':          '#334155',          // Borde slate-700
+    '--border-focus':    '#06b6d4',          // Borde Cian Neón al enfocar (cyan-500)
+    // Texto: Contraste cyber nítido
+    '--text-primary':    '#f8fafc',          // Blanco puro brillante (slate-50)
+    '--text-secondary':  '#cbd5e1',          // Gris claro (slate-300)
+    '--text-muted':      '#64748b',          // Slate 500
+    '--text-label':      '#06b6d4',          // Títulos de inputs en Cian Eléctrico
+    // Acento: Cian Cyber / Eléctrico Neón
+    '--accent':          '#06b6d4',          // Cian neón puro de alta visibilidad (cyan-500)
+    '--accent-hover':    '#22d3ee',          // Cian brillante en hovers (cyan-400)
+    '--accent-glow':     'rgba(6, 182, 212, 0.45)', // Destello neón incrementado para sombras y efectos
     // Tipografía
     '--font-sans':       "'Inter', 'DM Sans', system-ui, sans-serif",
     '--font-mono':       "'JetBrains Mono', 'Fira Code', monospace",
@@ -42,38 +42,76 @@ export const THEMES = {
     '--ls-heading':      '-0.04em',
     // Misc
     '--radius':          '1rem',
-    '--shadow-card':     '0 4px 32px rgba(0,0,0,0.5)',
-    '--scrollbar-thumb': '#1d4ed8',
+    '--shadow-card':     '0 0 25px rgba(6, 182, 212, 0.15)', // Brillo perimetral neón en tarjetas
+    '--scrollbar-thumb': '#06b6d4',
   },
 
-  light: {
-    label: 'Claro',
-    emoji: '☀️',
-    '--bg-app':          '#f8fafc',
-    '--bg-sidebar':      '#ffffff',
-    '--bg-card':         '#ffffff',
-    '--bg-card-hover':   '#f1f5f9',
-    '--bg-input':        '#f8fafc',
-    '--bg-badge':        '#f1f5f9',
-    '--border':          '#e2e8f0',
-    '--border-focus':    'rgba(37,99,235,0.4)',
-    '--text-primary':    '#0f172a',
-    '--text-secondary':  '#334155',
-    '--text-muted':      '#64748b',
-    '--text-label':      '#94a3b8',
-    '--accent':          '#2563eb',
-    '--accent-hover':    '#1d4ed8',
-    '--accent-glow':     'rgba(37,99,235,0.1)',
-    '--font-sans':       "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
-    '--font-mono':       "'JetBrains Mono', 'Fira Code', monospace",
-    '--font-display':    "'Plus Jakarta Sans', system-ui, sans-serif",
+light: {
+    label: 'Azul Ejecutivo',
+    emoji: '🔵',
+    // Fondos: Blanco puro con contrastes sutiles en gris-azul
+    '--bg-app':          '#f8fafc',          // Fondo blanco-azulado (Slate 50)
+    '--bg-sidebar':      '#ffffff',          // Sidebar pura
+    '--bg-card':         '#ffffff',          // Tarjetas limpias
+    '--bg-card-hover':   '#f1f5f9',          // Hover en azul grisáceo (Slate 100)
+    '--bg-input':        '#f8fafc',          // Inputs neutros
+    '--bg-badge':        '#e2e8f0',          // Badges en tono Slate 200
+    // Bordes: Azules muy tenues
+    '--border':          '#e2e8f0',          // Borde Slate 200
+    '--border-focus':    '#60a5fa',          // Foco azul brillante (Blue 400)
+    // Texto: Basado en tonos Slate, más legibles y menos cansados que el negro puro
+    '--text-primary':    '#0f172a',          // Azul marino muy oscuro (Slate 900)
+    '--text-secondary':  '#334155',          // Slate 700
+    '--text-muted':      '#64748b',          // Slate 500
+    '--text-label':      '#475569',          // Slate 600
+    // Acento: Azul Corporativo / Azul Cobalto
+    '--accent':          '#2563eb',          // Azul vibrante (Blue 600)
+    '--accent-hover':    '#1d4ed8',          // Azul profundo para hovers (Blue 700)
+    '--accent-glow':     'rgba(37, 99, 235, 0.15)',
+    // Tipografía: Limpia y moderna
+    '--font-sans':       "'Inter', system-ui, sans-serif",
+    '--font-mono':       "'JetBrains Mono', monospace",
+    '--font-display':    "'Inter', system-ui, sans-serif",
+    '--fw-heading':      '600',
+    '--ls-heading':      '-0.02em',
+    // Misc
+    '--radius':          '0.75rem',
+    '--shadow-card':     '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    '--scrollbar-thumb': '#94a3b8',
+  },
+Gris: {
+    label: 'Gris Nardo',
+    emoji: '🐺',
+    // Fondos: Escala de grises cemento/nardo balanceados
+    '--bg-app':          '#cbd5e1',          // Gris Nardo puro de base (slate-300)
+    '--bg-sidebar':      '#94a3b8',          // Sidebar ligeramente más oscura para contraste (slate-400)
+    '--bg-card':         '#f1f5f9',          // Tarjetas en gris nardo claro para resaltar del fondo (slate-100)
+    '--bg-card-hover':   '#ffe4e6',          // Hover sutilmente cálido o reactivo
+    '--bg-input':        '#ffffff',          // Inputs en blanco puro para máxima legibilidad al escribir
+    '--bg-badge':        '#ffedd5',          // Badges naranja pastel discretos
+    // Bordes: Líneas industriales limpias
+    '--border':          '#94a3b8',          // Bordes gris nardo medio (slate-400)
+    '--border-focus':    '#f97316',          // Foco en naranja puro (orange-500)
+    // Texto: Tonos carbón de alto contraste sobre el gris cemento
+    '--text-primary':    '#0f172a',          // Pizarra oscuro profundo (slate-900) para legibilidad total
+    '--text-secondary':  '#334155',          // Slate 700 para textos secundarios
+    '--text-muted':      '#475569',          // Slate 600 para detalles y placeholders
+    '--text-label':      '#ea580c',          // Etiquetas de formularios en el naranja principal
+    // Acento: Naranja Deportivo / Mecánico Industrial
+    '--accent':          '#ea580c',          // Naranja sólido de alta visibilidad (orange-600)
+    '--accent-hover':    '#c2410c',          // Naranja quemado profundo para hovers (orange-700)
+    '--accent-glow':     'rgba(234, 88, 12, 0.2)',
+    // Tipografía
+    '--font-sans':       "'Inter', system-ui, sans-serif",
+    '--font-mono':       "'JetBrains Mono', monospace",
+    '--font-display':    "'Inter', system-ui, sans-serif",
     '--fw-heading':      '700',
     '--ls-heading':      '-0.03em',
-    '--radius':          '0.875rem',
-    '--shadow-card':     '0 1px 8px rgba(15,23,42,0.08), 0 0 0 1px rgba(15,23,42,0.04)',
-    '--scrollbar-thumb': '#93c5fd',
+    // Misc
+    '--radius':          '0.75rem',
+    '--shadow-card':     '0 4px 6px -1px rgba(15, 23, 42, 0.08)',
+    '--scrollbar-thumb': '#ea580c',
   },
-
   slate: {
     label: 'Corporativo',
     emoji: '🏢',
@@ -100,6 +138,35 @@ export const THEMES = {
     '--radius':          '0.75rem',
     '--shadow-card':     '0 2px 20px rgba(0,0,0,0.4)',
     '--scrollbar-thumb': '#4f46e5',
+  },
+
+  matrix: {
+    label: 'Cyber Green',
+    emoji: '🟢',
+    // Estética hacker profesional: Negro absoluto con acentos verdes neón de alta tecnología
+    '--bg-app':          '#000000',          // Negro absoluto para contraste infinito OLED
+    '--bg-sidebar':      '#050505',          // Lateral ligeramente visible
+    '--bg-card':         '#0a0a0a',          // Tarjetas oscuras sólidas
+    '--bg-card-hover':   '#121212',          // Hover sutil
+    '--bg-input':        '#0f0f0f',          // Cajas de entrada oscuras
+    '--bg-badge':        'rgba(34,197,94,0.1)', // Fondo de etiquetas verde traslúcido
+    '--border':          '#1f2937',          // Gris oscuro (Gray 800)
+    '--border-focus':    '#22c55e',          // Borde verde neón al enfocar
+    '--text-primary':    '#ffffff',          // Blanco puro para textos principales
+    '--text-secondary':  '#a3a3a3',          // Gris claro para descripciones
+    '--text-muted':      '#4b5563',          // Gris intermedio
+    '--text-label':      '#22c55e',          // Etiquetas de formularios en verde neón institucional
+    '--accent':          '#22c55e',          // Verde Neón / Esmeralda tecnológico (Green 500)
+    '--accent-hover':    '#16a34a',          // Green 600 para hovers activos
+    '--accent-glow':     'rgba(34,197,94,0.3)',
+    '--font-sans':       "'Inter', system-ui, sans-serif",
+    '--font-mono':       "'JetBrains Mono', monospace",
+    '--font-display':    "'Inter', system-ui, sans-serif",
+    '--fw-heading':      '700',
+    '--ls-heading':      '-0.03em',
+    '--radius':          '0.5rem',
+    '--shadow-card':     '0 0 20px rgba(34,197,94,0.05)', // Brillo perimetral verde ultra tenue
+    '--scrollbar-thumb': '#16a34a',
   },
 };
 
