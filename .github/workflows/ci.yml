@@ -1,9 +1,9 @@
 name: CI Sistema Inventario TI
 
-# ¿Cuándo se ejecutará esto?
+
 on:
   push:
-    branches: [ "main", "master" ] # Cuando hagas push a estas ramas
+    branches: [ "main", "master" ] 
   pull_request:
     branches: [ "main", "master" ]
 
