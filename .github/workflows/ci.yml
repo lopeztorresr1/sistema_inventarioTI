@@ -8,7 +8,7 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  # Trabajo 1: Probar el Backend (Go)
+  #trabajo 1
   build-backend:
     name: Build Backend Go
     runs-on: ubuntu-latest
